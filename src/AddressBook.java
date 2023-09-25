@@ -13,22 +13,23 @@ public class AddressBook extends BuddyInfo {
         BuddyInfo buddy = new BuddyInfo("Tom", "Carleton", 613);
         AddressBook addressBook = new AddressBook();
         addressBook.addBuddy(buddy);
-        addressBook.removeBuddy(buddy);
+        addressBook.removeBuddy(0);
+        // check if changes are being updated
     }
     public AddressBook() {
-        this.addressBook = new ArrayList<BuddyInfo>(); // restarts address book
-
+        addressBook = new ArrayList<>(); // restarts address book
     }
 
-    public ArrayList<BuddyInfo> addBuddy(BuddyInfo newBuddy) {
-        addressBook.add(newBuddy);
-        return addressBook;
+    public void addBuddy(BuddyInfo newBuddy) {
+        if (newBuddy != null) {
+            addressBook.add(newBuddy);
+        }
     }
 
-    public ArrayList<BuddyInfo> removeBuddy(BuddyInfo delBuddy) {
-        addressBook.remove(delBuddy);
-        return addressBook;
+    public BuddyInfo removeBuddy(int index) {
+        if (index >= 0 && index < addressBook.size()) {
+            return addressBook.remove(index);
+        }
+        return null;
     }
-
-
 }
