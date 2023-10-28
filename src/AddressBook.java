@@ -2,6 +2,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.AWTEvent;
+import java.util.*;
+import java.awt.event.*;
+
 
 public class AddressBook extends BuddyInfo {
     /**
@@ -11,11 +14,43 @@ public class AddressBook extends BuddyInfo {
      * an addBuddy() and a removeBuddy() method
      */
     private ArrayList<BuddyInfo> addressBook;
+    private JMenuItem quitItem;
 
     // GUI stuff
+    public TicTacToeGUI()
+    {
+        JFrame frame = new JFrame("Tic Tac Toe");
+        Container contentPane = frame.getContentPane();
+        contentPane.setLayout(new BorderLayout());
+        frame.setPreferredSize(new Dimension (500, 500));
 
-    JFrame frame = new JFrame("Lab 5 for SYSC 3110");
-    frame.setSize(400, 300);
+        JMenuBar menubar = new JMenuBar();
+        frame.setJMenuBar(menubar);
+
+        JMenu fileMenu = new JMenu("Options");
+        menubar.add(fileMenu);
+        fileMenu.addMouseListener(this);
+
+        quitItem = new JMenuItem("Quit Game");
+        fileMenu.add(quitItem);
+
+        quitItem.addActionListener(new ActionListener() // create an anonymous inner class
+                                   { // start of anonymous subclass of ActionListener
+                                       // this allows us to put the code for this action here
+                                       public void actionPerformed(ActionEvent event)
+                                       {
+                                           System.exit(0); // quit
+                                       }
+                                   } // end of anonymous subclass
+        );
+
+
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setResizable(false);
+        frame.setVisible(true);
+
+    }
 
 
     public static void main(String[] args) {
