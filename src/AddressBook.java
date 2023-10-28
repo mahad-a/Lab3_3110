@@ -1,4 +1,7 @@
+import java.awt.*;
 import java.util.ArrayList;
+import javax.swing.*;
+import java.awt.AWTEvent;
 
 public class AddressBook extends BuddyInfo {
     /**
@@ -8,6 +11,12 @@ public class AddressBook extends BuddyInfo {
      * an addBuddy() and a removeBuddy() method
      */
     private ArrayList<BuddyInfo> addressBook;
+
+    // GUI stuff
+
+    JFrame frame = new JFrame("Lab 5 for SYSC 3110");
+    frame.setSize(400, 300);
+
 
     public static void main(String[] args) {
         BuddyInfo buddy = new BuddyInfo("Tom", "Carleton", 613);
@@ -32,4 +41,12 @@ public class AddressBook extends BuddyInfo {
         }
         return null;
     }
+
+    public void displayAddressBook() {
+        for (BuddyInfo buddy: addressBook) {
+            buddy.displayBuddy(buddy);
+        }
+    }
+
+
 }
