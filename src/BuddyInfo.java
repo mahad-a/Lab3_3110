@@ -28,9 +28,10 @@ public class BuddyInfo {
         return number;
     }
 
-    public void displayBuddy(BuddyInfo buddy) {
-        System.out.println("Buddy name: " + buddy.name);
-        System.out.println("Buddy address: " + buddy.address);
-        System.out.println("Buddy number: " + buddy.number);
+
+
+    @Override
+    public String toString() {
+        return "Buddy Name: " + name + " Address: " + address + " Number: " + number;
     }
 }

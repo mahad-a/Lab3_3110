@@ -2,30 +2,24 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.Random;
 
 
 public class AddressBook extends DefaultListModel {
 
     private DefaultListModel<BuddyInfo> addressBook;
     private JList<BuddyInfo> buddyList;
-    private Random random;
 
-
-    /* public AddressBook() {
-        addressBook = new DefaultListModel<>(); // restarts address book
-    } */
 
     // GUI stuff
     public AddressBook()
     {
         addressBook = new DefaultListModel<>();
-        buddyList = new JList<>(addressBook);
+        buddyList = new JList<>();
+
+        buddyList.setModel(addressBook);
 
         JFrame frame = new JFrame("Address Book");
-        Container contentPane = frame.getContentPane();
-        contentPane.setLayout(new BorderLayout());
-        frame.setPreferredSize(new Dimension (500, 500));
+        frame.setSize(500, 500);
 
 
         JMenuBar menu = new JMenuBar();
@@ -44,7 +38,7 @@ public class AddressBook extends DefaultListModel {
         });
 
         JMenuItem addBuddy = new JMenuItem("Add Buddy to AddressBook");
-        newAddressBook.addActionListener(new ActionListener() {
+        addBuddy.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addBuddy();
@@ -52,25 +46,18 @@ public class AddressBook extends DefaultListModel {
         });
 
         JMenuItem removeBuddy = new JMenuItem("Remove Buddy from AddressBook");
-        newAddressBook.addActionListener(new ActionListener() {
+        removeBuddy.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 removeBuddy();
             }
         });
 
-        JMenuItem displayAddressBook = new JMenuItem("Display Current AddressBook");
-        newAddressBook.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayAddressBook();
-            }
-        });
 
 
 
         addressBookMenu.add(newAddressBook);
-        addressBookMenu.add(displayAddressBook);
+
         buddyInfoMenu.add(addBuddy);
         buddyInfoMenu.add(removeBuddy);
 
@@ -78,7 +65,7 @@ public class AddressBook extends DefaultListModel {
         menu.add(buddyInfoMenu);
 
         frame.setLayout(new BorderLayout());
-        frame.add(new JScrollPane(buddyList), BorderLayout.CENTER);
+        frame.add(new JScrollPane(buddyList));
 
         frame.setJMenuBar(menu);
 
@@ -88,7 +75,6 @@ public class AddressBook extends DefaultListModel {
         frame.setResizable(true);
         frame.setVisible(true);
 
-        displayAddressBook();
     }
 
 
@@ -98,25 +84,21 @@ public class AddressBook extends DefaultListModel {
         });
     }
 
-
     public void addBuddy() {
-        displayAddressBook();
         String buddyName = JOptionPane.showInputDialog("Please enter the name of the buddy you wish to add");
         String buddyAddress = JOptionPane.showInputDialog("Please enter the address of the buddy");
+        String buddyNumber = JOptionPane.showInputDialog("Please enter the number of the buddy");
 
-        Random random = new Random(); // generate random number for temporary
-        int buddyNumber = random.nextInt(1000);
+        int buddyPhoneNumber = Integer.parseInt(buddyNumber);
 
-        if (buddyName != null || buddyAddress != null) { // user types in a name
-            new BuddyInfo(buddyName, buddyAddress, buddyNumber);
-        }
+        // user types in a name
+        BuddyInfo newBuddy = new BuddyInfo(buddyName, buddyAddress, buddyPhoneNumber);
+        addressBook.addElement(newBuddy);
 
-        displayAddressBook();
         System.out.println("Successfully added: " + buddyName);
     }
 
     public void removeBuddy() {
-        displayAddressBook();
         String buddyName = JOptionPane.showInputDialog("Please enter the name of the buddy you wish to remove");
 
         if (buddyName != null) { // user types in a name
@@ -126,22 +108,12 @@ public class AddressBook extends DefaultListModel {
             for (int i = 0; i < tempBuddyList.size(); i++) {
                 if (tempBuddyList.getElementAt(i).getName().equals(buddyName)) {
                     addressBook.remove(i);
-                    tempBuddyList.remove(i);
                     break; // only need to remove the first instance
                 }
             }
         }
 
-        displayAddressBook();
         System.out.println("Successfully removed: " + buddyName);
-    }
-
-    public void displayAddressBook() {
-        DefaultListModel<BuddyInfo> display = (DefaultListModel<BuddyInfo>) buddyList.getModel();
-
-        for (int i = 0; i < addressBook.size(); i++) {
-            display.addElement(addressBook.getElementAt(i));
-        }
     }
 
     public void createNewAddressBook() { // wipes current address book
