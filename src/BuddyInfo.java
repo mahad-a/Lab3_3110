@@ -32,6 +32,6 @@ public class BuddyInfo {
 
     @Override
     public String toString() {
-        return "Buddy Name: " + name + " Address: " + address + " Number: " + number;
+        return "Mr." + name + "#" + address + "#" + number;
     }
 }

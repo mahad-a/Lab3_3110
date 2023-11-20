@@ -1,4 +1,8 @@
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.event.*;
@@ -8,13 +12,13 @@ public class AddressBook extends DefaultListModel {
 
     private DefaultListModel<BuddyInfo> addressBook;
     private JList<BuddyInfo> buddyList;
-
+    private FileOutputStream ostream;
 
     // GUI stuff
-    public AddressBook()
-    {
+    public AddressBook() throws FileNotFoundException {
         addressBook = new DefaultListModel<>();
         buddyList = new JList<>();
+        FileOutputStream ostream = new FileOutputStream("output.txt");
 
         buddyList.setModel(addressBook);
 
@@ -26,6 +30,7 @@ public class AddressBook extends DefaultListModel {
 
         JMenu addressBookMenu = new JMenu("AddressBook");
         JMenu buddyInfoMenu = new JMenu("BuddyInfo");
+        JMenu exportMenu = new JMenu("Export");
 
 
         // Menu Items
@@ -42,6 +47,11 @@ public class AddressBook extends DefaultListModel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addBuddy();
+                try {
+                    saveAddressBook(ostream);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -53,16 +63,35 @@ public class AddressBook extends DefaultListModel {
             }
         });
 
-
-
+        JMenuItem exportPage = new JMenuItem(("Export Address Book"));
+        exportPage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object askFile = JOptionPane.showInputDialog(null, "Type in the name of the file.", "File to Export to", 3);
+                FileOutputStream newFile;
+                try {
+                    newFile = new FileOutputStream(askFile + ".txt");
+                } catch (FileNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+                try {
+                    saveAddressBook(newFile);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         addressBookMenu.add(newAddressBook);
 
         buddyInfoMenu.add(addBuddy);
         buddyInfoMenu.add(removeBuddy);
 
+        exportMenu.add(exportPage);
+
         menu.add(addressBookMenu);
         menu.add(buddyInfoMenu);
+        menu.add(exportMenu);
 
         frame.setLayout(new BorderLayout());
         frame.add(new JScrollPane(buddyList));
@@ -77,10 +106,17 @@ public class AddressBook extends DefaultListModel {
 
     }
 
+    public DefaultListModel<BuddyInfo> getAddressBook() {
+        return addressBook;
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            AddressBook addressBookMain = new AddressBook();
+            try {
+                AddressBook addressBookMain = new AddressBook();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 
@@ -118,6 +154,21 @@ public class AddressBook extends DefaultListModel {
 
     public void createNewAddressBook() { // wipes current address book
         addressBook.clear();
+    }
+
+
+    public void saveAddressBook(FileOutputStream ostream) throws IOException {
+        ObjectOutputStream saveBook;
+        try {
+            saveBook = new ObjectOutputStream(ostream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        for (int i = 0; i < addressBook.size(); i++){
+            saveBook.writeObject(addressBook.get(i));
+            System.out.println(addressBook.get(i));
+        }
+        //ostream.close();
     }
 
 
