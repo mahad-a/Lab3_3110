@@ -1,11 +1,13 @@
-public class BuddyInfo {
+import java.io.Serializable;
+
+public class BuddyInfo implements Serializable {
     private String name;
     private String address;
     private int number;
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         BuddyInfo buddy = new BuddyInfo("Homer", "123 Pebble", 1000);
         System.out.println("Hello, " + buddy.getName());
-    }
+    } */
 
     public BuddyInfo() {
     }
@@ -28,7 +30,11 @@ public class BuddyInfo {
         return number;
     }
 
-
+    public static BuddyInfo importBuddyInfo(String buddy){
+        String[] words = buddy.split("#");
+        BuddyInfo importedBuddy = new BuddyInfo(words[0], words[1], Integer.parseInt(words[2]));
+        return importedBuddy;
+    }
 
     @Override
     public String toString() {

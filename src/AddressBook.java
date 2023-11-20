@@ -1,14 +1,12 @@
 import java.awt.*;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.Serializable;
 
 
-public class AddressBook extends DefaultListModel {
+public class AddressBook extends DefaultListModel implements java.io.Serializable {
 
     private DefaultListModel<BuddyInfo> addressBook;
     private JList<BuddyInfo> buddyList;
@@ -18,7 +16,8 @@ public class AddressBook extends DefaultListModel {
     public AddressBook() throws FileNotFoundException {
         addressBook = new DefaultListModel<>();
         buddyList = new JList<>();
-        FileOutputStream ostream = new FileOutputStream("output.txt");
+        File output = new File("output.txt");
+        FileOutputStream ostream = new FileOutputStream(output, true);
 
         buddyList.setModel(addressBook);
 
@@ -31,6 +30,8 @@ public class AddressBook extends DefaultListModel {
         JMenu addressBookMenu = new JMenu("AddressBook");
         JMenu buddyInfoMenu = new JMenu("BuddyInfo");
         JMenu exportMenu = new JMenu("Export");
+        JMenu importMenu = new JMenu("Import");
+        JMenu serializationMenu = new JMenu("Serialization");
 
 
         // Menu Items
@@ -47,11 +48,7 @@ public class AddressBook extends DefaultListModel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addBuddy();
-                try {
-                    saveAddressBook(ostream);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+                saveAddressBook(ostream);
             }
         });
 
@@ -74,11 +71,38 @@ public class AddressBook extends DefaultListModel {
                 } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
+                saveAddressBook(newFile);
+
+            }
+        });
+
+        JMenuItem importBook = new JMenuItem("Import Address Book");
+        importBook.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object askFile = JOptionPane.showInputDialog(null, "Type in the name of the file.", "File to Export to", 3);
+                FileInputStream newFile;
                 try {
-                    saveAddressBook(newFile);
-                } catch (IOException ex) {
+                    newFile = new FileInputStream(askFile + ".txt");
+                } catch (FileNotFoundException ex) {
                     throw new RuntimeException(ex);
                 }
+                importAddressBook(newFile);
+            }
+        });
+
+        JMenuItem serialization = new JMenu("Serialize");
+        serialization.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                serialize(AddressBook.this);
+            }
+        });
+        JMenuItem deserialization = new JMenu("Deserialize");
+        deserialization.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                deserialize();
             }
         });
 
@@ -87,11 +111,16 @@ public class AddressBook extends DefaultListModel {
         buddyInfoMenu.add(addBuddy);
         buddyInfoMenu.add(removeBuddy);
 
+        serializationMenu.add(serialization);
+        serializationMenu.add(deserialization);
+
         exportMenu.add(exportPage);
+        importMenu.add(importBook);
 
         menu.add(addressBookMenu);
         menu.add(buddyInfoMenu);
         menu.add(exportMenu);
+        menu.add(serializationMenu);
 
         frame.setLayout(new BorderLayout());
         frame.add(new JScrollPane(buddyList));
@@ -157,18 +186,68 @@ public class AddressBook extends DefaultListModel {
     }
 
 
-    public void saveAddressBook(FileOutputStream ostream) throws IOException {
-        ObjectOutputStream saveBook;
-        try {
-            saveBook = new ObjectOutputStream(ostream);
+    public void saveAddressBook(FileOutputStream userFile) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(userFile.getFD()))) {
+            for (int i = 0; i < addressBook.size(); i++) {
+                writer.println(addressBook.get(i).toString());
+                System.out.println(addressBook.get(i).toString());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        for (int i = 0; i < addressBook.size(); i++){
-            saveBook.writeObject(addressBook.get(i));
-            System.out.println(addressBook.get(i));
+    }
+
+    public AddressBook importAddressBook(FileInputStream readFile) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(readFile))) {
+            AddressBook newAddressBook = new AddressBook();
+            while (reader.ready()) {
+                String buddyInfoString = reader.readLine();
+                System.out.println("Read line: " + buddyInfoString);
+
+                BuddyInfo buddy = BuddyInfo.importBuddyInfo(buddyInfoString);
+                System.out.println("Imported BuddyInfo: " + buddy);
+
+                newAddressBook.addElement(buddy);
+            }
+            System.out.println(newAddressBook);
+            return newAddressBook;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        //ostream.close();
+    }
+
+    public void serialize(AddressBook addressBook){
+        try {
+            FileOutputStream fileOut = new FileOutputStream("output.ser");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(addressBook.toString());
+            out.close();
+            fileOut.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+    }
+
+    public AddressBook deserialize() {
+        AddressBook addressBook = null;
+        try {
+            FileInputStream fileIn = new FileInputStream("output.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+
+            // Check if the object is an instance of AddressBook
+            Object obj = in.readObject();
+            if (obj instanceof AddressBook) {
+                addressBook = (AddressBook) obj;
+            } else {
+                System.err.println("Unexpected object type in the serialized file.");
+            }
+
+            in.close();
+            fileIn.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return addressBook;
     }
 
 
